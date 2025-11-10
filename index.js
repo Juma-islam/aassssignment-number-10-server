@@ -76,16 +76,7 @@ async function run() {
       res.send({ success: true, result });
     });
 
-    // Update issue
-    // app.put("/issues/:id", async (req, res) => {
-    //   const { id } = req.params;
-    //   const updateData = req.body;
-    //   const result = await issuesCollection.updateOne(
-    //     { _id: new ObjectId(id) },
-    //     { $set: updateData }
-    //   );
-    //   res.send({ success: true, result });
-    // });
+  // update issue 
     app.put("/issues/:id", async (req, res) => {
       const { id } = req.params;
       const updateData = req.body;
@@ -94,19 +85,19 @@ async function run() {
       const update = {
         $set: updateData,
       };
-      const result = await modelCollection.updateOne(filter, update);
+      const result = await issuesCollection.updateOne(filter, update);
       res.send({ success: true, result });
     });
 
-    // Delete issue by id
-    // app.delete("/issues/:id", async (req, res) => {
-    //   const { id } = req.params;
-    //   const result = await issuesCollection.deleteOne({ _id: new ObjectId(id) });
-    //   res.send({ success: true, result });
-    // });
+    // delete issue
+    app.delete("/issues/:id", async (req, res) => {
+      const { id } = req.params;
+      const result = await issuesCollection.deleteOne({ _id: new ObjectId(id) });
+      res.send({ success: true, result });
+    });
 
-    // akan theke chaatgpt sesh
 
+// client db 
     await client.db("admin").command({ ping: 1 });
     console.log("Pinged your deployment. You successfully connected to MongoDB!");
   } finally {
