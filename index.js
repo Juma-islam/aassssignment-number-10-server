@@ -24,7 +24,9 @@ async function run() {
 
     const db = client.db("clean-connect");
     const issuesCollection = db.collection("issues");
-    const contributionCollection = db.collection("contribution");
+    const contributionsCollection = db.collection("contributions");
+    // const contributionsCollection = client.db("cleanConnectDB").collection("contributions");
+
 
     // all issues
     app.get("/issues", async (req, res) => {
@@ -58,14 +60,14 @@ async function run() {
     // modal contribution
     app.post("/contributions", async (req, res) => {
       const data = req.body;
-      const result = await contributionCollection.insertOne(data);
+      const result = await contributionsCollection.insertOne(data);
       res.send({ success: true, result });
     });
 
     // modal contribution id
-    app.get("/contributions/:issueId", async (req, res) => {
-      const { issueId } = req.params;
-      const result = await contributionCollection.find({ issueId: issueId }).toArray();
+    app.get("/contributions-by-issue/:issueId", async (req, res) => {
+      const  issueId  = req.query.issueId;
+      const result = await contributionsCollection.find({ issueId }).toArray();
       res.send({ success: true, result });
     });
 
@@ -95,7 +97,21 @@ async function run() {
       const result = await issuesCollection.deleteOne({ _id: new ObjectId(id) });
       res.send({ success: true, result });
     });
+//  all contributions 
+app.get("/contributions", async (req, res) => {
+  const email = req.query.email;
+  const query = email? {email} : {};
+  const result = await contributionsCollection.find(query).toArray();
+  res.send(result)
+});
 
+
+// new contribution 
+// app.post("/contributions", async (req, res)=> {
+// const contribution = req.body;
+// const result = await contributionsCollection.insertOne(contribution);
+// res.send(result);
+// })
 
 // client db 
     await client.db("admin").command({ ping: 1 });
