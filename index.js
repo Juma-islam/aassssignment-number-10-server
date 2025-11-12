@@ -114,6 +114,12 @@ app.get("/contributions", async (req, res) => {
   res.send({success: true, result})
 });
 
+// latest-issue
+app.get('/latest-issues', async (req, res) => {
+  const result = await issuesCollection.find().sort({ date: 'desc'}).limit(6).toArray();
+  res.send(result);
+
+})
 
 // client db 
     await client.db("admin").command({ ping: 1 });
