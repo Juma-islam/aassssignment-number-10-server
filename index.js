@@ -30,7 +30,15 @@ async function run() {
 
     // all issues
     app.get("/issues", async (req, res) => {
-      const result = await issuesCollection.find().toArray();
+      const {category, status} = req.query;
+      const filter = {};
+      if(category){
+        filter.category = category;
+      }
+      if(status){
+        filter.status = status;
+      }
+      const result = await issuesCollection.find(filter).toArray();
       res.send(result);
     });
 
@@ -97,21 +105,15 @@ async function run() {
       const result = await issuesCollection.deleteOne({ _id: new ObjectId(id) });
       res.send({ success: true, result });
     });
+
 //  all contributions 
 app.get("/contributions", async (req, res) => {
   const email = req.query.email;
   const query = email? {email} : {};
   const result = await contributionsCollection.find(query).toArray();
-  res.send(result)
+  res.send({success: true, result})
 });
 
-
-// new contribution 
-// app.post("/contributions", async (req, res)=> {
-// const contribution = req.body;
-// const result = await contributionsCollection.insertOne(contribution);
-// res.send(result);
-// })
 
 // client db 
     await client.db("admin").command({ ping: 1 });
