@@ -1,15 +1,15 @@
 const express = require("express");
 const cors = require("cors");
 const { MongoClient, ServerApiVersion, ObjectId } = require("mongodb");
+require("dotenv").config();
 const app = express();
 const port = process.env.PORT || 5000;
 
 // middleware
 app.use(cors());
 app.use(express.json());
-// name: clean-connect
-// password: caiS7mjc6qcuzx4t
-const uri = "mongodb+srv://clean-connect:caiS7mjc6qcuzx4t@cluster0.ecxm2rv.mongodb.net/?appName=Cluster0";
+
+const uri = `mongodb+srv://${process.env.DB_USERNAME}:${process.env.DB_PASSWORD}@cluster0.ecxm2rv.mongodb.net/?appName=Cluster0`;
 
 const client = new MongoClient(uri, {
   serverApi: {
@@ -18,9 +18,10 @@ const client = new MongoClient(uri, {
     deprecationErrors: true,
   },
 });
+
 async function run() {
   try {
-    await client.connect();
+    // await client.connect();
 
     const db = client.db("clean-connect");
     const issuesCollection = db.collection("issues");
@@ -63,12 +64,14 @@ async function run() {
       });
     });
 
+
     // modal contribution
     app.post("/contributions", async (req, res) => {
       const data = req.body;
       const result = await contributionsCollection.insertOne(data);
       res.send({ success: true, result });
     });
+
 
     // modal contribution id
     app.get("/contributions-by-issue/:issueId", async (req, res) => {
@@ -77,12 +80,14 @@ async function run() {
       res.send({ success: true, result });
     });
 
+
     // My issue
     app.get("/my-issues/:email", async (req, res) => {
       const { email } = req.params;
       const result = await issuesCollection.find({ email }).toArray();
       res.send({ success: true, result });
     });
+
 
     // update issue
     app.put("/issues/:id", async (req, res) => {
@@ -97,12 +102,14 @@ async function run() {
       res.send({ success: true, result });
     });
 
+
     // delete issue
     app.delete("/issues/:id", async (req, res) => {
       const { id } = req.params;
       const result = await issuesCollection.deleteOne({ _id: new ObjectId(id) });
       res.send({ success: true, result });
     });
+
 
     //  all contributions
     app.get("/contributions", async (req, res) => {
@@ -112,6 +119,7 @@ async function run() {
       res.send({ success: true, result });
     });
 
+
     // latest-issue
     app.get("/latest-issues", async (req, res) => {
       const result = await issuesCollection.find().sort({ date: "desc" }).limit(6).toArray();
@@ -119,17 +127,16 @@ async function run() {
     });
 
     // client db
-    await client.db("admin").command({ ping: 1 });
+    // await client.db("admin").command({ ping: 1 });
     console.log("Pinged your deployment. You successfully connected to MongoDB!");
   } finally {
-    // Ensures that the client will close when you finish/error
     // await client.close();
   }
 }
 run().catch(console.dir);
 
 app.get("/", (req, res) => {
-  res.send("Hello World!");
+  res.send("Server running is fine!");
 });
 
 app.listen(port, () => {
