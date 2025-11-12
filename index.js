@@ -25,17 +25,15 @@ async function run() {
     const db = client.db("clean-connect");
     const issuesCollection = db.collection("issues");
     const contributionsCollection = db.collection("contributions");
-    // const contributionsCollection = client.db("cleanConnectDB").collection("contributions");
-
 
     // all issues
     app.get("/issues", async (req, res) => {
-      const {category, status} = req.query;
+      const { category, status } = req.query;
       const filter = {};
-      if(category){
+      if (category) {
         filter.category = category;
       }
-      if(status){
+      if (status) {
         filter.status = status;
       }
       const result = await issuesCollection.find(filter).toArray();
@@ -74,7 +72,7 @@ async function run() {
 
     // modal contribution id
     app.get("/contributions-by-issue/:issueId", async (req, res) => {
-      const  issueId  = req.query.issueId;
+      const issueId = req.query.issueId;
       const result = await contributionsCollection.find({ issueId }).toArray();
       res.send({ success: true, result });
     });
@@ -86,7 +84,7 @@ async function run() {
       res.send({ success: true, result });
     });
 
-  // update issue 
+    // update issue
     app.put("/issues/:id", async (req, res) => {
       const { id } = req.params;
       const updateData = req.body;
@@ -106,22 +104,21 @@ async function run() {
       res.send({ success: true, result });
     });
 
-//  all contributions 
-app.get("/contributions", async (req, res) => {
-  const email = req.query.email;
-  const query = email? {email} : {};
-  const result = await contributionsCollection.find(query).toArray();
-  res.send({success: true, result})
-});
+    //  all contributions
+    app.get("/contributions", async (req, res) => {
+      const email = req.query.email;
+      const query = email ? { email } : {};
+      const result = await contributionsCollection.find(query).toArray();
+      res.send({ success: true, result });
+    });
 
-// latest-issue
-app.get('/latest-issues', async (req, res) => {
-  const result = await issuesCollection.find().sort({ date: 'desc'}).limit(6).toArray();
-  res.send(result);
+    // latest-issue
+    app.get("/latest-issues", async (req, res) => {
+      const result = await issuesCollection.find().sort({ date: "desc" }).limit(6).toArray();
+      res.send(result);
+    });
 
-})
-
-// client db 
+    // client db
     await client.db("admin").command({ ping: 1 });
     console.log("Pinged your deployment. You successfully connected to MongoDB!");
   } finally {
