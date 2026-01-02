@@ -24,6 +24,7 @@ async function run() {
     // await client.connect();
 
     const db = client.db("clean-connect");
+    const usersCollection = db.collection("users");
     const issuesCollection = db.collection("issues");
     const contributionsCollection = db.collection("contributions");
 
@@ -64,14 +65,12 @@ async function run() {
       });
     });
 
-
     // modal contribution
     app.post("/contributions", async (req, res) => {
       const data = req.body;
       const result = await contributionsCollection.insertOne(data);
       res.send({ success: true, result });
     });
-
 
     // modal contribution id
     app.get("/contributions-by-issue/:issueId", async (req, res) => {
@@ -80,14 +79,12 @@ async function run() {
       res.send({ success: true, result });
     });
 
-
     // My issue
     app.get("/my-issues/:email", async (req, res) => {
       const { email } = req.params;
       const result = await issuesCollection.find({ email }).toArray();
       res.send({ success: true, result });
     });
-
 
     // update issue
     app.put("/issues/:id", async (req, res) => {
@@ -102,14 +99,12 @@ async function run() {
       res.send({ success: true, result });
     });
 
-
     // delete issue
     app.delete("/issues/:id", async (req, res) => {
       const { id } = req.params;
       const result = await issuesCollection.deleteOne({ _id: new ObjectId(id) });
       res.send({ success: true, result });
     });
-
 
     //  all contributions
     app.get("/contributions", async (req, res) => {
@@ -119,13 +114,38 @@ async function run() {
       res.send({ success: true, result });
     });
 
-
     // latest-issue
     app.get("/latest-issues", async (req, res) => {
       const result = await issuesCollection.find().sort({ date: "desc" }).limit(6).toArray();
       res.send(result);
     });
 
+    // ===========================
+
+    // Get user role (for frontend)
+    app.get("/user-role/:email", async (req, res) => {
+      const { email } = req.params;
+      const user = await usersCollection.findOne({ email });
+      res.send({ role: user?.role || "user" }); 
+    });
+
+    app.post("/save-user", async (req, res) => {
+      const { email, name, photoURL } = req.body;
+      const filter = { email };
+      const update = { $set: { email, name, photoURL, role: "user" } }; 
+      const options = { upsert: true };
+      const result = await usersCollection.updateOne(filter, update, options);
+      res.send(result);
+    });
+
+    // Admin only: 
+    app.patch("/make-admin/:email", async (req, res) => {
+      const { email } = req.params;
+      // Simple security: 
+      const result = await usersCollection.updateOne({ email }, { $set: { role: "admin" } });
+      res.send(result);
+    });
+    // ================================
     // client db
     // await client.db("admin").command({ ping: 1 });
     console.log("Pinged your deployment. You successfully connected to MongoDB!");
