@@ -120,32 +120,32 @@ async function run() {
       res.send(result);
     });
 
-    // ===========================
-
-    // Get user role (for frontend)
+    // Get user role
     app.get("/user-role/:email", async (req, res) => {
       const { email } = req.params;
       const user = await usersCollection.findOne({ email });
-      res.send({ role: user?.role || "user" }); 
+      res.send({ role: user?.role || "user" });
     });
 
     app.post("/save-user", async (req, res) => {
       const { email, name, photoURL } = req.body;
       const filter = { email };
-      const update = { $set: { email, name, photoURL, role: "user" } }; 
+      const update = {
+        $set: { name, photoURL },
+        $setOnInsert: { email, role: "user" },
+      };
       const options = { upsert: true };
       const result = await usersCollection.updateOne(filter, update, options);
       res.send(result);
     });
 
-    // Admin only: 
+    // Admin only:
     app.patch("/make-admin/:email", async (req, res) => {
       const { email } = req.params;
-      // Simple security: 
       const result = await usersCollection.updateOne({ email }, { $set: { role: "admin" } });
       res.send(result);
     });
-    // ================================
+
     // client db
     // await client.db("admin").command({ ping: 1 });
     console.log("Pinged your deployment. You successfully connected to MongoDB!");
